@@ -4,7 +4,14 @@ import pika
 from wopr import *
 
 
+ENV_BUS_HOST = 'BUS_HOST'
+ENV_BUS_PORT = 'BUS_PORT'
+
+
 class BusConnector(object):
+
+    QUEUE_NUMBERS = 'wopr_numbers'
+    QUEUE_RESULTS = 'wopr_results'
 
     def __init__(self, hostname=None, port=None) -> None:
         super().__init__()
@@ -23,6 +30,10 @@ class BusConnector(object):
 
     def disconnect(self):
         self.connection.close()
+
+
+    def print_callback(self, ch, method, properties, body):
+        print(body.decode('utf-8'))
 
     def __str__(self):
         return 'bus_host[%s], bus_port[%s]' % (self.hostname, self.port)

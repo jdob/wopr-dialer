@@ -10,24 +10,29 @@ from wopr import *
 from wopr.base import BusConnector
 
 
+DEFAULT_SLEEP = 2
+
+
 class Dialer(BusConnector):
 
     def connect(self):
         super().connect()
-        self.channel.queue_declare(queue=QUEUE_NUMBERS)
-        self.channel.queue_declare(queue=QUEUE_RESULTS)
+        self.channel.queue_declare(queue=self.QUEUE_NUMBERS)
+        self.channel.queue_declare(queue=self.QUEUE_RESULTS)
+
+        self.sleep_time = os.environ.get('SLEEP_TIME', DEFAULT_SLEEP)
 
     def start_reading_numbers(self, callback=None):
         callback = callback or self.process_number
 
-        self.channel.basic_consume(queue=QUEUE_NUMBERS,
+        self.channel.basic_consume(queue=self.QUEUE_NUMBERS,
                                    on_message_callback=callback,
                                    auto_ack=False)
         self.channel.start_consuming()
 
     def send_result(self, result):
         self.channel.basic_publish(exchange='',
-                                   routing_key=QUEUE_RESULTS,
+                                   routing_key=self.QUEUE_RESULTS,
                                    body=result)
 
     def process_number(self, ch, method, properties, body):
@@ -35,9 +40,9 @@ class Dialer(BusConnector):
         body = body.decode('utf-8')
         print('Processing %s' % body)
 
-        time.sleep(2)
+        time.sleep(self.sleep_time)
 
-        result = '%s - Disconnected' % body
+        result = '%s - No Connection' % body
         if random.randrange(0, 10) == 0:
             result = '%s - Connection Found' % body
 

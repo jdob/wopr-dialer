@@ -12,10 +12,10 @@ class Listener(BusConnector):
     def connect(self):
         super().connect()
 
-        self.channel.queue_declare(queue=QUEUE_RESULTS)
+        self.channel.queue_declare(queue=self.QUEUE_RESULTS)
 
     def start_reading_results(self, callback):
-        self.channel.basic_consume(queue=QUEUE_RESULTS,
+        self.channel.basic_consume(queue=self.QUEUE_RESULTS,
                                    on_message_callback=callback,
                                    auto_ack=True)
         self.channel.start_consuming()
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     print('Listening for results on [%s]' % l)
 
     try:
-        l.start_reading_results(print_callback)
+        l.start_reading_results(l.print_callback)
     except KeyboardInterrupt:
         print('Disconnecting from the message bus')
         l.disconnect()

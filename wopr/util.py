@@ -12,18 +12,18 @@ class Util(BusConnector):
     def connect(self):
         super().connect()
 
-        self.channel.queue_declare(queue=QUEUE_NUMBERS)
-        self.channel.queue_declare(queue=QUEUE_RESULTS)
+        self.channel.queue_declare(queue=self.QUEUE_NUMBERS)
+        self.channel.queue_declare(queue=self.QUEUE_RESULTS)
 
     def purge_all(self):
         self.purge_numbers()
         self.purge_results()
 
     def purge_numbers(self):
-        self.channel.queue_purge(QUEUE_NUMBERS)
+        self.channel.queue_purge(self.QUEUE_NUMBERS)
 
     def purge_results(self):
-        self.channel.queue_purge(QUEUE_RESULTS)
+        self.channel.queue_purge(self.QUEUE_RESULTS)
 
     def populate(self):
         for i in range(0, 10000):
@@ -32,9 +32,8 @@ class Util(BusConnector):
 
     def _send_number(self, number):
         self.channel.basic_publish(exchange='',
-                                   routing_key=QUEUE_NUMBERS,
+                                   routing_key=self.QUEUE_NUMBERS,
                                    body=number)
-
 
 
 def parse(args):
@@ -63,7 +62,6 @@ def parse(args):
                         dest='purge_results',
                         action='store_true',
                         help='purges messages from the results message queue')
-
 
     # Arguments
     parser.add_argument('-h', '--hostname',
