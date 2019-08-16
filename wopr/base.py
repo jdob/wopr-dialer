@@ -19,6 +19,7 @@ class BusConnector(object):
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(host=self.hostname, port=self.port))
         self.channel = self.connection.channel()
+        self.channel.basic_qos(prefetch_count=1)
 
     def disconnect(self):
         self.connection.close()
