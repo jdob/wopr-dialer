@@ -31,17 +31,17 @@ class Dialer(BusConnector):
                                    body=result)
 
     def process_number(self, ch, method, properties, body):
+
         body = body.decode('utf-8')
         print('Processing %s' % body)
 
-        time.sleep(3)
+        time.sleep(2)
 
         result = '%s - Disconnected' % body
         if random.randrange(0, 10) == 0:
             result = '%s - Connection Found' % body
 
         self.send_result(result)
-
         self.channel.basic_ack(delivery_tag=method.delivery_tag)
 
 
@@ -73,4 +73,9 @@ if __name__ == '__main__':
     d.connect()
 
     print('Reading numbers on [%s]' % d)
-    d.start_reading_numbers()
+
+    try:
+        d.start_reading_numbers()
+    except KeyboardInterrupt:
+        print('Disconnecting from the message bus')
+        d.disconnect()

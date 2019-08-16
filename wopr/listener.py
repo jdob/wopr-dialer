@@ -48,4 +48,10 @@ if __name__ == '__main__':
     l = Listener(hostname=parsed.hostname, port=parsed.port)
     l.connect()
 
-    l.start_reading_results(print_callback)
+    print('Listening for results on [%s]' % l)
+
+    try:
+        l.start_reading_results(print_callback)
+    except KeyboardInterrupt:
+        print('Disconnecting from the message bus')
+        l.disconnect()
