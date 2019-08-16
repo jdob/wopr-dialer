@@ -1,6 +1,8 @@
 import argparse
 import os
+import random
 import sys
+import time
 
 import pika
 
@@ -13,17 +15,34 @@ class Dialer(BusConnector):
     def connect(self):
         super().connect()
         self.channel.queue_declare(queue=QUEUE_NUMBERS)
+        self.channel.queue_declare(queue=QUEUE_RESULTS)
 
-    def start_reading_numbers(self, callback):
+    def start_reading_numbers(self, callback=None):
+        callback = callback or self.process_number
+
         self.channel.basic_consume(queue=QUEUE_NUMBERS,
                                    on_message_callback=callback,
-                                   auto_ack=True)
+                                   auto_ack=False)
         self.channel.start_consuming()
 
     def send_result(self, result):
         self.channel.basic_publish(exchange='',
                                    routing_key=QUEUE_RESULTS,
                                    body=result)
+
+    def process_number(self, ch, method, properties, body):
+        body = body.decode('utf-8')
+        print('Processing %s' % body)
+
+        time.sleep(3)
+
+        result = '%s - Disconnected' % body
+        if random.randrange(0, 10) == 0:
+            result = '%s - Connection Found' % body
+
+        self.send_result(result)
+
+        self.channel.basic_ack(delivery_tag=method.delivery_tag)
 
 
 def parse(args):
@@ -54,4 +73,4 @@ if __name__ == '__main__':
     d.connect()
 
     print('Reading numbers on [%s]' % d)
-    d.start_reading_numbers(print_callback)
+    d.start_reading_numbers()
