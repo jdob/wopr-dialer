@@ -15,11 +15,6 @@ class Util(BusConnector):
         self.channel.queue_declare(queue=QUEUE_NUMBERS)
         self.channel.queue_declare(queue=QUEUE_RESULTS)
 
-    def send_number(self, number):
-        self.channel.basic_publish(exchange='',
-                                   routing_key=QUEUE_NUMBERS,
-                                   body=number)
-
     def purge_all(self):
         self.purge_numbers()
         self.purge_results()
@@ -33,7 +28,13 @@ class Util(BusConnector):
     def populate(self):
         for i in range(0, 10000):
             number = '555-%s' % str(i).zfill(4)
-            self.send_number(number)
+            self._send_number(number)
+
+    def _send_number(self, number):
+        self.channel.basic_publish(exchange='',
+                                   routing_key=QUEUE_NUMBERS,
+                                   body=number)
+
 
 
 def parse(args):
